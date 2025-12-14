@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Eventos TikTok</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            margin: 10px;
+            padding: 12px 25px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        #pixel-id {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .auto-mode {
+            background-color: #28a745;
+        }
+        .auto-mode:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        function getPixelId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('pixel_id') || '';
+        }
+
+        function setPixelId(pixelId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('pixel_id', pixelId);
+            window.history.pushState({}, '', url);
+            return pixelId;
+        }
+
+        function loadPixel() {
+            const pixelId = getPixelId();
+            if (!pixelId) {
+                alert('Informe um ID de Pixel para continuar.');
+                return;
+            }
+            !function (w, d, t) {
+                w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
+                ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],
+                ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+                for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
+                ttq.load=function(e){
+                    var n=document.createElement("script");
+                    n.type="text/javascript",n.async=!0,n.src="https://analytics.tiktok.com/i18n/pixel/events.js?sdkid="+e+"&lib="+t;
+                    var r=document.getElementsByTagName("script")[0];
+                    r.parentNode.insertBefore(n,r)
+                };
+                ttq.load(pixelId);
+                ttq.page();
+            }(window, document, 'ttq');
+        }
+    </script>
+</head>
+<body onload="loadPixel()">
+    <div class="container">
+        <h1>Teste de Eventos TikTok</h1>
+        <input type="text" id="pixel-id" placeholder="Digite o ID do Pixel" value="" />
+        <button onclick="setPixelId(document.getElementById('pixel-id').value); location.reload();">Carregar Pixel</button>
+        <button id="toggle-auto-mode" class="auto-mode">Ativar Modo Automático</button>
+        <br>
+        <button id="open-cart">Abrir Carrinho</button>
+        <button id="view-checkout">Visualizar Checkout</button>
+        <button id="start-checkout">Iniciar Checkout</button>
+        <button id="purchase">Finalizar Compra</button>
+        <button id="view-content">Visualizar Conteúdo</button>
+        <button id="add-payment-info">Adicionar Informações de Pagamento</button>
+        <button id="add-to-wishlist">Adicionar à Lista de Desejos</button>
+        <button id="complete-registration">Completar Registro</button>
+    </div>
+
+    <script>
+        function trackEvent(event, value = 0, currency = "BRL") {
+            ttq.track(event, { value: value, currency: currency });
+        }
+
+        const events = ["AddToCart", "InitiateCheckout", "StartCheckout", "Purchase", "ViewContent", "AddPaymentInfo", "AddToWishlist", "CompleteRegistration"];
+        
+        document.getElementById("open-cart").addEventListener("click", () => trackEvent("AddToCart", 50));
+        document.getElementById("view-checkout").addEventListener("click", () => trackEvent("InitiateCheckout", 100));
+        document.getElementById("start-checkout").addEventListener("click", () => trackEvent("StartCheckout", 120));
+        document.getElementById("purchase").addEventListener("click", () => trackEvent("Purchase", 200));
+        document.getElementById("view-content").addEventListener("click", () => trackEvent("ViewContent", 30));
+        document.getElementById("add-payment-info").addEventListener("click", () => trackEvent("AddPaymentInfo", 0));
+        document.getElementById("add-to-wishlist").addEventListener("click", () => trackEvent("AddToWishlist", 70));
+        document.getElementById("complete-registration").addEventListener("click", () => trackEvent("CompleteRegistration", 0));
+        
+        let autoMode = false;
+        let autoInterval;
+        
+        document.getElementById("toggle-auto-mode").addEventListener("click", function () {
+            if (!autoMode) {
+                autoMode = true;
+                this.innerText = "Desativar Modo Automático";
+                autoInterval = setInterval(() => {
+                    events.forEach((event, index) => {
+                        setTimeout(() => trackEvent(event), index * 1000);
+                    });
+                }, 8000);
+            } else {
+                autoMode = false;
+                this.innerText = "Ativar Modo Automático";
+                clearInterval(autoInterval);
+            }
+        });
+    </script>
+</body>
+</html>
