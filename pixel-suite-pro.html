@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Testing Suite Pro</title>
+    <!-- Importação do Bootstrap para layout responsivo -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Ícones do Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --tiktok-color: #000000;
+            --meta-color: #0066ff;
+            --kwai-color: #ff6600;
+            --success-color: #10b981;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        .platform-tab {
+            border-radius: 12px 12px 0 0;
+            padding: 15px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+        }
+        
+        .platform-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .platform-tab.tiktok.active { color: var(--tiktok-color); }
+        .platform-tab.meta.active { color: var(--meta-color); }
+        .platform-tab.kwai.active { color: var(--kwai-color); }
+        
+        .main-card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            background: white;
+            margin-bottom: 30px;
+        }
+        
+        .event-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            height: 100%;
+            background: #f8fafc;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-card.purchase { border-top: 4px solid var(--success-color); }
+        .event-card.addtocart { border-top: 4px solid #3b82f6; }
+        .event-card.viewcontent { border-top: 4px solid #8b5cf6; }
+        
+        .event-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .event-btn:hover {
+            transform: scale(1.03);
+        }
+        
+        .btn-tiktok { background: linear-gradient(135deg, #000000, #333333); color: white; }
+        .btn-meta { background: linear-gradient(135deg, #0066ff, #0099ff); color: white; }
+        .btn-kwai { background: linear-gradient(135deg, #ff6600, #ff9900); color: white; }
+        
+        .console-log {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .log-entry {
+            border-left: 3px solid;
+            padding-left: 12px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .auto-mode-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .param-input {
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            padding: 10px 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .param-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Cabeçalho -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h1 class="fw-bold display-5 mb-3" style="color: var(--primary-color);">
+                    <i class="fas fa-chart-line me-3"></i>Pixel Testing Suite Pro
+                </h1>
+                <p class="lead text-muted">Teste e valide pixels do TikTok, Meta e Kwai em um único dashboard profissional</p>
+            </div>
+        </div>
+        
+        <!-- Seleção de Plataforma -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="platform-tab tiktok active" data-platform="tiktok">
+                        <i class="fab fa-tiktok me-2"></i>TikTok Pixel
+                    </button>
+                    <button class="platform-tab meta" data-platform="meta">
+                        <i class="fab fa-facebook me-2"></i>Meta Pixel
+                    </button>
+                    <button class="platform-tab kwai" data-platform="kwai">
+                        <i class="fas fa-video me-2"></i>Kwai Pixel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Painel Principal -->
+        <div class="row">
+            <!-- Coluna de Controle -->
+            <div class="col-lg-4 mb-4">
+                <div class="main-card p-4 h-100">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-sliders-h me-2"></i>Configuração</h4>
+                    
+                    <!-- Seletor de Pixel ID -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Pixel ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-fingerprint"></i></span>
+                            <input type="text" class="form-control param-input" id="pixel-id" 
+                                   placeholder="Ex: C1234567890ABCDEF" value="">
+                        </div>
+                        <div class="form-text">Insira o ID do pixel da plataforma selecionada</div>
+                    </div>
+                    
+                    <!-- Parâmetros Customizados -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Parâmetros do Evento</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="number" class="form-control param-input" id="param-value" 
+                                       placeholder="Valor" value="100">
+                            </div>
+                            <div class="col-6">
+                                <input type="text" class="form-control param-input" id="param-currency" 
+                                       placeholder="Moeda" value="BRL">
+                            </div>
+                            <div class="col-12 mt-2">
+                                <input type="text" class="form-control param-input" id="param-content-id" 
+                                       placeholder="ID do Conteúdo" value="prod_001">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modo Automático -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-semibold mb-0">Modo Automático</label>
+                            <span id="auto-mode-status" class="badge bg-secondary">Desativado</span>
+                        </div>
+                        <div class="d-grid">
+                            <button id="toggle-auto-mode" class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-robot me-2"></i>Ativar Modo Automático
+                            </button>
+                        </div>
+                        <div class="form-text mt-2">
+                            Dispara todos os eventos sequencialmente a cada 10 segundos
+                        </div>
+                    </div>
+                    
+                    <!-- Ações Gerais -->
+                    <div class="d-grid gap-2">
+                        <button id="clear-console" class="btn btn-outline-secondary">
+                            <i class="fas fa-broom me-2"></i>Limpar Console
+                        </button>
+                        <button id="copy-pixel-id" class="btn btn-outline-success">
+                            <i class="fas fa-copy me-2"></i>Copiar Configuração
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Coluna de Eventos -->
+            <div class="col-lg-5 mb-4">
+                <div class="main-card p-4 h-100">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-bolt me-2"></i>Eventos</h4>
+                    <div class="row g-3">
+                        <!-- Jornada de Compra -->
+                        <div class="col-12">
+                            <h6 class="fw-semibold text-muted mb-3">🎯 Jornada de Compra</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="event-card viewcontent">
+                                        <h6 class="fw-bold">Visualizar Conteúdo</h6>
+                                        <p class="small text-muted">Usuário visualiza um produto/conteúdo</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="ViewContent">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card addtocart">
+                                        <h6 class="fw-bold">Adicionar ao Carrinho</h6>
+                                        <p class="small text-muted">Item adicionado ao carrinho de compras</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="AddToCart">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card">
+                                        <h6 class="fw-bold">Iniciar Checkout</h6>
+                                        <p class="small text-muted">Usuário inicia processo de checkout</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="InitiateCheckout">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card purchase">
+                                        <h6 class="fw-bold">Finalizar Compra</h6>
+                                        <p class="small text-muted">Transação concluída com sucesso</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="Purchase">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Eventos de Engajamento -->
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-semibold text-muted mb-3">💡 Engajamento</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="event-card">
+                                        <h6 class="fw-bold">Lista de Desejos</h6>
+                                        <p class="small text-muted">Item salvo na lista de desejos</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="AddToWishlist">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card">
+                                        <h6 class="fw-bold">Info. Pagamento</h6>
+                                        <p class="small text-muted">Informações de pagamento adicionadas</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="AddPaymentInfo">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card">
+                                        <h6 class="fw-bold">Registro Completo</h6>
+                                        <p class="small text-muted">Usuário completa cadastro/registro</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="CompleteRegistration">
+                                            Disparar Evento
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="event-card">
+                                        <h6 class="fw-bold">Contato</h6>
+                                        <p class="small text-muted">Usuário entra em contato</p>
+                                        <button class="event-btn btn-tiktok send-event" data-event="Contact">
+                                            Disparar Evento
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Console de Logs -->
+            <div class="col-lg-3">
+                <div class="main-card p-4 h-100 d-flex flex-column">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-terminal me-2"></i>Console de Logs</h4>
+                    <div class="console-log flex-grow-1" id="event-console">
+                        <div class="log-entry" style="border-left-color: #94a3b8;">
+                            <div class="text-success fw-semibold">Sistema inicializado</div>
+                            <div class="text-muted small">Pronto para disparar eventos</div>
+                            <div class="text-muted small">00:00:00</div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between small">
+                            <span>Total de eventos: <strong id="event-count">0</strong></span>
+                            <button class="btn btn-sm btn-outline-secondary" id="export-logs">
+                                <i class="fas fa-download me-1"></i>Exportar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rodapé Informativo -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="text-center text-muted small">
+                    <p class="mb-0">
+                        <i class="fas fa-shield-alt me-1"></i>Este tool é apenas para testes de desenvolvimento. 
+                        Não use pixels reais em produção.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts do Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- NOSSA IMPLEMENTAÇÃO MODULAR -->
+    <script>
+        // ==================== SISTEMA DE LOGS ====================
+        class EventLogger {
+            constructor() {
+                this.consoleElement = document.getElementById('event-console');
+                this.eventCount = 0;
+                this.eventCountElement = document.getElementById('event-count');
+            }
+            
+            log(platform, event, status = 'success', details = '') {
+                this.eventCount++;
+                this.eventCountElement.textContent = this.eventCount;
+                
+                const timestamp = new Date().toLocaleTimeString('pt-BR');
+                const platformColors = {
+                    'tiktok': '#000000',
+                    'meta': '#0066ff',
+                    'kwai': '#ff6600'
+                };
+                const statusIcons = {
+                    'success': '✅',
+                    'error': '❌',
+                    'info': 'ℹ️'
+                };
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.style.borderLeftColor = platformColors[platform] || '#94a3b8';
+                
+                logEntry.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="me-2">${statusIcons[status] || '📝'}</span>
+                        <span class="fw-semibold text-uppercase" style="color: ${platformColors[platform]}">
+                            ${platform}
+                        </span>
+                        <span class="ms-2">${event}</span>
+                    </div>
+                    <div class="text-muted small">${details || 'Evento disparado com sucesso'}</div>
+                    <div class="text-muted small">${timestamp}</div>
+                `;
+                
+                this.consoleElement.prepend(logEntry);
+                
+                // Manter máximo de 50 logs
+                if (this.consoleElement.children.length > 50) {
+                    this.consoleElement.removeChild(this.consoleElement.lastChild);
+                }
+                
+                // Scroll automático para o topo
+                this.consoleElement.scrollTop = 0;
+            }
+            
+            clear() {
+                this.consoleElement.innerHTML = `
+                    <div class="log-entry" style="border-left-color: #94a3b8;">
+                        <div class="text-success fw-semibold">Console limpo</div>
+                        <div class="text-muted small">Pronto para novos eventos</div>
+                        <div class="text-muted small">${new Date().toLocaleTimeString('pt-BR')}</div>
+                    </div>
+                `;
+                this.eventCount = 0;
+                this.eventCountElement.textContent = '0';
+            }
+        }
+        
+        // ==================== GERENCIADOR BASE DE PIXELS ====================
+        class BasePixelManager {
+            constructor(platform, logger) {
+                this.platform = platform;
+                this.logger = logger;
+                this.isLoaded = false;
+                this.pixelId = '';
+                this.autoMode = false;
+                this.autoInterval = null;
+            }
+            
+            initialize(pixelId) {
+                if (!pixelId) {
+                    this.logger.log(this.platform, 'INIT', 'error', 'Pixel ID não fornecido');
+                    return false;
+                }
+                
+                this.pixelId = pixelId;
+                this.isLoaded = true;
+                this.logger.log(this.platform, 'INIT', 'success', `Pixel ${pixelId} carregado`);
+                return true;
+            }
+            
+            track(event, parameters = {}) {
+                if (!this.isLoaded) {
+                    this.logger.log(this.platform, event, 'error', 'Pixel não inicializado');
+                    return false;
+                }
+                
+                // Método a ser implementado por cada plataforma
+                this.logger.log(this.platform, event, 'info', 'Método base chamado');
+                return false;
+            }
+            
+            getEventParameters() {
+                return {
+                    value: parseFloat(document.getElementById('param-value').value) || 0,
+                    currency: document.getElementById('param-currency').value || 'BRL',
+                    content_id: document.getElementById('param-content-id').value || '',
+                    content_type: 'product',
+                    timestamp: Math.floor(Date.now() / 1000)
+                };
+            }
+        }
+        
+        // ==================== GERENCIADOR TIKTOK ====================
+        class TikTokPixelManager extends BasePixelManager {
+            constructor(logger) {
+                super('tiktok', logger);
+            }
+            
+            initialize(pixelId) {
+                if (!super.initialize(pixelId)) return false;
+                
+                // Carrega o script do TikTok Pixel
+                !function (w, d, t) {
+                    w.TiktokAnalyticsObject = t;
+                    var ttq = w[t] = w[t] || [];
+                    ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"];
+                    ttq.setAndDefer = function (t, e) {
+                        t[e] = function () {
+                            t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
+                        }
+                    };
+                    for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+                    ttq.load = function (e) {
+                        var n = document.createElement("script");
+                        n.type = "text/javascript", n.async = !0, n.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e + "&lib=" + t;
+                        var r = document.getElementsByTagName("script")[0];
+                        r.parentNode.insertBefore(n, r)
+                    };
+                    ttq.load(pixelId);
+                    ttq.page();
+                }(window, document, 'ttq');
+                
+                return true;
+            }
+            
+            track(event, customParams = {}) {
+                if (!super.track(event)) return false;
+                
+                const params = { ...this.getEventParameters(), ...customParams };
+                
+                try {
+                    // Mapeamento de eventos TikTok
+                    const tiktokEventMap = {
+                        'ViewContent': 'ViewContent',
+                        'AddToCart': 'AddToCart',
+                        'InitiateCheckout': 'InitiateCheckout',
+                        'Purchase': 'Purchase',
+                        'AddToWishlist': 'AddToWishlist',
+                        'AddPaymentInfo': 'AddPaymentInfo',
+                        'CompleteRegistration': 'CompleteRegistration',
+                        'Contact': 'Contact'
+                    };
+                    
+                    const tiktokEvent = tiktokEventMap[event] || event;
+                    
+                    // Dispara o evento
+                    if (window.ttq && window.ttq.track) {
+                        window.ttq.track(tiktokEvent, params);
+                        this.logger.log(this.platform, event, 'success', 
+                            `Valor: ${params.value} ${params.currency}`);
+                        return true;
+                    } else {
+                        this.logger.log(this.platform, event, 'error', 'SDK TikTok não carregado');
+                        return false;
+                    }
+                } catch (error) {
+                    this.logger.log(this.platform, event, 'error', error.message);
+                    return false;
+                }
+            }
+        }
+        
+        // ==================== GERENCIADOR META (FACEBOOK) ====================
+        class MetaPixelManager extends BasePixelManager {
+            constructor(logger) {
+                super('meta', logger);
+            }
+            
+            initialize(pixelId) {
+                if (!super.initialize(pixelId)) return false;
+                
+                // Carrega o script do Meta Pixel
+                !function(f, b, e, v, n, t, s) {
+                    if (f.fbq) return;
+                    n = f.fbq = function() {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    };
+                    if (!f._fbq) f._fbq = n;
+                    n.push = n;
+                    n.loaded = !0;
+                    n.version = '2.0';
+                    n.queue = [];
+                    t = b.createElement(e);
+                    t.async = !0;
+                    t.src = v;
+                    s = b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t, s)
+                }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+                
+                // Inicializa o pixel
+                if (window.fbq) {
+                    window.fbq('init', pixelId);
+                    this.logger.log(this.platform, 'INIT', 'success', `Pixel ${pixelId} inicializado`);
+                }
+                
+                return true;
+            }
+            
+            track(event, customParams = {}) {
+                if (!super.track(event)) return false;
+                
+                const params = { ...this.getEventParameters(), ...customParams };
+                
+                try {
+                    // Mapeamento de eventos Meta
+                    const metaEventMap = {
+                        'ViewContent': 'ViewContent',
+                        'AddToCart': 'AddToCart',
+                        'InitiateCheckout': 'InitiateCheckout',
+                        'Purchase': 'Purchase',
+                        'AddToWishlist': 'AddToWishlist',
+                        'AddPaymentInfo': 'AddPaymentInfo',
+                        'CompleteRegistration': 'CompleteRegistration',
+                        'Contact': 'Contact'
+                    };
+                    
+                    const metaEvent = metaEventMap[event] || event;
+                    
+                    // Dispara o evento
+                    if (window.fbq) {
+                        window.fbq('track', metaEvent, params);
+                        this.logger.log(this.platform, event, 'success', 
+                            `Meta Pixel: ${params.value} ${params.currency}`);
+                        return true;
+                    } else {
+                        this.logger.log(this.platform, event, 'error', 'SDK Meta não carregado');
+                        return false;
+                    }
+                } catch (error) {
+                    this.logger.log(this.platform, event, 'error', error.message);
+                    return false;
+                }
+            }
+        }
+        
+        // ==================== GERENCIADOR KWAi ====================
+        class KwaiPixelManager extends BasePixelManager {
+            constructor(logger) {
+                super('kwai', logger);
+                // Kwai geralmente usa uma estrutura similar ao TikTok
+                // Esta é uma implementação genérica - ajuste conforme a documentação oficial
+            }
+            
+            initialize(pixelId) {
+                if (!super.initialize(pixelId)) return false;
+                
+                // IMPLEMENTAÇÃO DO KWAi PIXEL AQUI
+                // Consulte a documentação oficial do Kwai para o SDK correto
+                
+                this.logger.log(this.platform, 'INIT', 'info', 
+                    'Implementação do Kwai requer SDK oficial. Usando simulação.');
+                
+                return true;
+            }
+            
+            track(event, customParams = {}) {
+                if (!super.track(event)) return false;
+                
+                const params = { ...this.getEventParameters(), ...customParams };
+                
+                // Simulação do envio do evento
+                setTimeout(() => {
+                    this.logger.log(this.platform, event, 'success', 
+                        `[SIMULAÇÃO] Kwai Pixel: ${params.value} ${params.currency}`);
+                }, 100);
+                
+                return true;
+            }
+        }
+        
+        // ==================== APLICAÇÃO PRINCIPAL ====================
+        class PixelTestingApp {
+            constructor() {
+                this.logger = new EventLogger();
+                this.currentPlatform = 'tiktok';
+                this.managers = {
+                    'tiktok': new TikTokPixelManager(this.logger),
+                    'meta': new MetaPixelManager(this.logger),
+                    'kwai': new KwaiPixelManager(this.logger)
+                };
+                this.autoMode = false;
+                this.autoInterval = null;
+                
+                this.initializeUI();
+                this.loadStoredPixelId();
+            }
+            
+            initializeUI() {
+                // Troca de plataforma
+                document.querySelectorAll('.platform-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        this.switchPlatform(e.target.dataset.platform);
+                    });
+                });
+                
+                // Botões de evento
+                document.querySelectorAll('.send-event').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const event = e.target.dataset.event;
+                        this.trackEvent(event);
+                    });
+                });
+                
+                // Modo automático
+                document.getElementById('toggle-auto-mode').addEventListener('click', () => {
+                    this.toggleAutoMode();
+                });
+                
+                // Limpar console
+                document.getElementById('clear-console').addEventListener('click', () => {
+                    this.logger.clear();
+                });
+                
+                // Copiar configuração
+                document.getElementById('copy-pixel-id').addEventListener('click', () => {
+                    this.copyConfiguration();
+                });
+                
+                // Exportar logs
+                document.getElementById('export-logs').addEventListener('click', () => {
+                    this.exportLogs();
+                });
+                
+                // Atualizar Pixel ID quando alterado
+                document.getElementById('pixel-id').addEventListener('change', (e) => {
+                    this.savePixelId(e.target.value);
+                });
+                
+                // Inicializar com TikTok
+                this.switchPlatform('tiktok');
+            }
+            
+            switchPlatform(platform) {
+                // Atualizar UI
+                document.querySelectorAll('.platform-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.dataset.platform === platform) {
+                        tab.classList.add('active');
+                    }
+                });
+                
+                // Atualizar botões
+                document.querySelectorAll('.event-btn').forEach(btn => {
+                    btn.className = btn.className.replace(/btn-\w+/, `btn-${platform}`);
+                });
+                
+                // Atualizar plataforma atual
+                this.currentPlatform = platform;
+                
+                // Carregar Pixel ID salvo para esta plataforma
+                this.loadStoredPixelId();
+                
+                this.logger.log('system', 'SWITCH', 'info', `Plataforma alterada para ${platform}`);
+            }
+            
+            loadStoredPixelId() {
+                const storedId = localStorage.getItem(`pixel_id_${this.currentPlatform}`);
+                if (storedId) {
+                    document.getElementById('pixel-id').value = storedId;
+                    this.initializeCurrentPixel();
+                }
+            }
+            
+            savePixelId(pixelId) {
+                localStorage.setItem(`pixel_id_${this.currentPlatform}`, pixelId);
+                this.initializeCurrentPixel();
+            }
+            
+            initializeCurrentPixel() {
+                const pixelId = document.getElementById('pixel-id').value;
+                if (pixelId) {
+                    this.managers[this.currentPlatform].initialize(pixelId);
+                }
+            }
+            
+            trackEvent(event) {
+                const pixelId = document.getElementById('pixel-id').value;
+                
+                if (!pixelId) {
+                    alert(`Por favor, insira um Pixel ID para ${this.currentPlatform}`);
+                    document.getElementById('pixel-id').focus();
+                    return;
+                }
+                
+                // Garantir que o pixel está inicializado
+                if (!this.managers[this.currentPlatform].isLoaded) {
+                    this.managers[this.currentPlatform].initialize(pixelId);
+                }
+                
+                // Disparar evento
+                this.managers[this.currentPlatform].track(event);
+            }
+            
+            toggleAutoMode() {
+                const button = document.getElementById('toggle-auto-mode');
+                const status = document.getElementById('auto-mode-status');
+                
+                if (!this.autoMode) {
+                    // Verificar se há Pixel ID
+                    const pixelId = document.getElementById('pixel-id').value;
+                    if (!pixelId) {
+                        alert('Configure um Pixel ID antes de ativar o modo automático');
+                        return;
+                    }
+                    
+                    this.autoMode = true;
+                    button.innerHTML = '<i class="fas fa-stop-circle me-2"></i>Parar Modo Automático';
+                    button.classList.remove('btn-outline-primary');
+                    button.classList.add('btn-danger');
+                    status.textContent = 'Ativo';
+                    status.classList.remove('bg-secondary');
+                    status.classList.add('bg-success');
+                    
+                    this.logger.log('system', 'AUTO_MODE', 'info', 'Modo automático ativado');
+                    
+                    // Sequência de eventos
+                    const events = ['ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase'];
+                    let eventIndex = 0;
+                    
+                    this.autoInterval = setInterval(() => {
+                        if (eventIndex < events.length) {
+                            this.trackEvent(events[eventIndex]);
+                            eventIndex++;
+                        } else {
+                            eventIndex = 0; // Reiniciar sequência
+                        }
+                    }, 3000); // A cada 3 segundos
+                    
+                } else {
+                    this.autoMode = false;
+                    clearInterval(this.autoInterval);
+                    
+                    button.innerHTML = '<i class="fas fa-robot me-2"></i>Ativar Modo Automático';
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-outline-primary');
+                    status.textContent = 'Desativado';
+                    status.classList.remove('bg-success');
+                    status.classList.add('bg-secondary');
+                    
+                    this.logger.log('system', 'AUTO_MODE', 'info', 'Modo automático desativado');
+                }
+            }
+            
+            copyConfiguration() {
+                const config = {
+                    platform: this.currentPlatform,
+                    pixelId: document.getElementById('pixel-id').value,
+                    params: {
+                        value: document.getElementById('param-value').value,
+                        currency: document.getElementById('param-currency').value,
+                        content_id: document.getElementById('param-content-id').value
+                    },
+                    timestamp: new Date().toISOString()
+                };
+                
+                navigator.clipboard.writeText(JSON.stringify(config, null, 2))
+                    .then(() => {
+                        this.logger.log('system', 'COPY', 'success', 'Configuração copiada para clipboard');
+                    })
+                    .catch(err => {
+                        this.logger.log('system', 'COPY', 'error', 'Falha ao copiar: ' + err.message);
+                    });
+            }
+            
+            exportLogs() {
+                const logs = [];
+                const logEntries = document.querySelectorAll('.log-entry');
+                
+                logEntries.forEach(entry => {
+                    logs.push(entry.textContent.replace(/\s+/g, ' ').trim());
+                });
+                
+                const blob = new Blob([logs.join('\n\n')], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pixel-logs-${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.logger.log('system', 'EXPORT', 'success', 'Logs exportados com sucesso');
+            }
+        }
+        
+        // ==================== INICIALIZAÇÃO DA APLICAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            window.pixelApp = new PixelTestingApp();
+        });
+    </script>
+</body>
+</html>
