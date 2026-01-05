@@ -113,6 +113,7 @@
                     <div class="data-row"><div><span class="data-label">WHATSAPP</span><span id="f-tel">...</span></div><button class="btn-secondary" onclick="copy('f-tel')">Copiar</button></div>
                 </div>
                 <button class="btn-primary" onclick="buscarEmpresaReal()">Gerar Novos Dados</button>
+                <button class="btn-outline" onclick="copiarTudo()">📋 Copiar TODAS as Informações</button>
             </div>
         </div>
 
@@ -147,6 +148,46 @@
                 document.getElementById('status-ip').innerText = "Erro ao carregar IP.";
                 buscarEmpresaReal();
             }
+        }
+
+        function copiarTudo() {
+            const dados = {
+                razao: document.getElementById('f-razao').innerText,
+                cnpj: document.getElementById('f-cnpj').innerText,
+                endereco: document.getElementById('f-endereco-full').innerText,
+                cep: document.getElementById('f-cep').innerText,
+                whatsapp: document.getElementById('f-tel').innerText,
+                pixel: document.getElementById('pixel-id').value || "Não informado"
+            };
+        
+            const textoBackup =
+        `
+        PIXEL TIKTOK:
+        ${dados.pixel}
+        
+        RAZÃO SOCIAL:
+        ${dados.razao}
+        
+        CNPJ:
+        ${dados.cnpj}
+        
+        ENDEREÇO:
+        ${dados.endereco}
+        
+        CEP:
+        ${dados.cep}
+        
+        WHATSAPP:
+        ${dados.whatsapp}
+        
+        DATA:
+        ${new Date().toLocaleString()}
+        
+        `;
+        
+            navigator.clipboard.writeText(textoBackup).then(() => {
+                alert("✅ Todas as informações foram copiadas com sucesso!");
+            });
         }
 
         async function buscarEmpresaReal() {
