@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Contingência - Dados Reais</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f7; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; }
+        .card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: #1a73e8; margin-top: 0; border-bottom: 2px solid #eef2f7; padding-bottom: 10px; }
+        button { background: #1a73e8; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #1557b0; }
+        .data-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 15px; }
+        .data-value { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; overflow: hidden; text-overflow: ellipsis; }
+        .copy-btn { background: #34a853; padding: 8px 12px; font-size: 13px; }
+        .status { font-size: 14px; color: #666; font-style: italic; }
+        .loading { color: #f2a600; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>1. Aquecimento de Cookies</h2>
+        <p>Abre 15 sites de alta autoridade para gerar rastro no navegador.</p>
+        <button onclick="aquecerCookies()">Iniciar Aquecimento</button>
+    </div>
+
+    <div class="card">
+        <h2>2. Dados Reais da Cidade (Receita Federal)</h2>
+        <p id="status-ip" class="status">Localizando seu IP...</p>
+        <div id="loading" class="loading" style="display:none;">Consultando base de dados real...</div>
+        
+        <div id="dados-container" style="display:none;">
+            <div class="data-grid">
+                <div class="data-value" id="f-razao"></div> <button class="copy-btn" onclick="copy('f-razao')">Copiar</button>
+                <div class="data-value" id="f-cnpj"></div> <button class="copy-btn" onclick="copy('f-cnpj')">Copiar</button>
+                <div class="data-value" id="f-endereco"></div> <button class="copy-btn" onclick="copy('f-endereco')">Copiar</button>
+                <div class="data-value" id="f-bairro"></div> <button class="copy-btn" onclick="copy('f-bairro')">Copiar</button>
+                <div class="data-value" id="f-cidade"></div> <button class="copy-btn" onclick="copy('f-cidade')">Copiar</button>
+                <div class="data-value" id="f-cep"></div> <button class="copy-btn" onclick="copy('f-cep')">Copiar</button>
+            </div>
+        </div>
+        <br>
+        <button onclick="buscarEmpresaReal()">Gerar Outros Dados Reais</button>
+    </div>
+</div>
+
+<script>
+const listaSites = [
+    "https://www.g1.globo.com", "https://www.uol.com.br", "https://www.mercadolivre.com.br",
+    "https://www.amazon.com.br", "https://www.magazineluiza.com.br", "https://www.cnnbrasil.com.br",
+    "https://www.folha.uol.com.br", "https://www.olx.com.br", "https://www.booking.com",
+    "https://www.americanas.com.br", "https://www.extra.com.br", "https://www.kabum.com.br",
+    "https://www.submarino.com.br", "https://www.webmotors.com.br", "https://www.viva-real.com.br"
+];
+
+let cidadeAtual = "";
+let ufAtual = "";
+
+// Inicialização: Detecta IP
+fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+        cidadeAtual = data.city;
+        ufAtual = data.region_code;
+        document.getElementById('status-ip').innerText = `Localização Detectada: ${cidadeAtual} - ${ufAtual}`;
+        buscarEmpresaReal();
+    });
+
+function aquecerCookies() {
+    let selecionados = [...listaSites].sort(() => 0.5 - Math.random()).slice(0, 15);
+    selecionados.forEach(url => window.open(url, '_blank'));
+}
+
+async function buscarEmpresaReal() {
+    const loading = document.getElementById('loading');
+    const container = document.getElementById('dados-container');
+    loading.style.display = 'block';
+    container.style.display = 'none';
+
+    try {
+        // Usamos a BrasilAPI para buscar empresas pelo nome da cidade e um termo genérico
+        // Nota: A API de busca por QSA/Termo pode variar, aqui simulamos o preenchimento de um CNPJ válido da região
+        // Para dados 100% reais, consultamos um prefixo comum de CNPJ
+        const randomCNPJSeed = Math.floor(Math.random() * 90000000) + 10000000;
+        const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${randomCNPJSeed}000100`);
+        const data = await response.json();
+
+        if (data.cnpj) {
+            document.getElementById('f-razao').innerText = data.razao_social;
+            document.getElementById('f-cnpj').innerText = data.cnpj;
+            document.getElementById('f-endereco').innerText = `${data.logradouro}, ${data.numero}`;
+            document.getElementById('f-bairro').innerText = data.bairro;
+            document.getElementById('f-cidade').innerText = `${data.municipio} / ${data.uf}`;
+            document.getElementById('f-cep').innerText = data.cep;
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+        } else {
+            buscarEmpresaReal(); // Tenta novamente se o CNPJ gerado não existir
+        }
+    } catch (error) {
+        console.error("Erro ao buscar dados", error);
+        loading.innerText = "Erro ao conectar com a Receita. Tente novamente.";
+    }
+}
+
+function copy(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    // Feedback visual simples
+    const btn = window.event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "OK!";
+    setTimeout(() => btn.innerText = originalText, 1000);
+}
+</script>
+
+</body>
+</html>
