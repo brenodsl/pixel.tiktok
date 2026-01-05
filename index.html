@@ -149,6 +149,10 @@
                         <button class="btn-secondary" onclick="copy('f-endereco-full')">Copiar</button>
                     </div>
                     <div class="data-row">
+                        <div><span class="data-label">CEP</span><div class="data-content" id="f-cep">...</div></div>
+                        <button class="btn-secondary" onclick="copy('f-cep')">Copiar</button>
+                    </div>
+                    <div class="data-row">
                         <div><span class="data-label">CIDADE / UF / CEP</span><div class="data-content" id="f-cidade-cep">...</div></div>
                         <button class="btn-secondary" onclick="copy('f-cidade-cep')">Copiar</button>
                     </div>
@@ -225,7 +229,8 @@
                     document.getElementById('f-cnpj').innerText = data.cnpj;
                     // FORMATAÇÃO SOLICITADA: RUA, NUMERO, BAIRRO
                     document.getElementById('f-endereco-full').innerText = `${data.logradouro}, ${data.numero}, ${data.bairro}`;
-                    document.getElementById('f-cidade-cep').innerText = `${data.municipio} / ${data.uf} - ${data.cep}`;
+                    document.getElementById('f-cep').innerText = `${data.cep}`;
+                    document.getElementById('f-cidade-cep').innerText = `${data.municipio} / ${data.uf}`;
                     
                     // TELEFONE: Usa o da Receita ou gera um com DDD local
                     let tel = data.ddd_telefone_1 || (dddLocal + "9" + Math.floor(10000000 + Math.random() * 90000000));
