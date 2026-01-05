@@ -6,8 +6,8 @@
     <title>Ads Manager - Hub de Contingência</title>
     <style>
         :root {
-            --primary: #00f2ea; /* Cor TikTok */
-            --secondary: #ff0050; /* Cor TikTok */
+            --primary: #00f2ea;
+            --secondary: #ff0050;
             --bg: #0f172a;
             --card: #1e293b;
             --text: #f8fafc;
@@ -41,18 +41,17 @@
             border: 1px solid var(--accent);
         }
 
-        .full-width { grid-column: 1 / -1; }
-
-        h1, h2 { 
+        h2 { 
             margin-top: 0; 
-            font-size: 1.5rem;
+            font-size: 1.3rem;
+            color: var(--primary);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        h1 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
-
+        .input-group { margin-bottom: 15px; text-align: left; }
+        
         input {
             width: 100%;
             padding: 12px;
@@ -60,7 +59,6 @@
             border: 1px solid var(--accent);
             border-radius: 8px;
             color: white;
-            margin-bottom: 15px;
             box-sizing: border-box;
         }
 
@@ -70,7 +68,7 @@
             border-radius: 8px;
             padding: 12px 18px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -78,44 +76,38 @@
         }
 
         .btn-primary { background: var(--primary); color: #000; width: 100%; }
-        .btn-secondary { background: var(--accent); color: white; }
+        .btn-secondary { background: var(--accent); color: white; padding: 8px 12px; }
         .btn-success { background: #22c55e; color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-
-        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); width: 100%; }
 
         .data-row {
             background: rgba(0,0,0,0.2);
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-left: 4px solid var(--primary);
         }
 
-        .data-label { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px; }
-        .data-content { font-family: 'Monaco', monospace; font-size: 0.95rem; }
+        .data-label { font-size: 0.7rem; color: #94a3b8; display: block; }
+        .data-content { font-family: monospace; font-size: 0.9rem; word-break: break-all; padding-right: 10px; }
 
         .pixel-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
         }
 
         .status-badge {
-            font-size: 0.8rem;
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: #334155;
-            margin-bottom: 10px;
-            display: inline-block;
+            font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;
+            background: #334155; margin-bottom: 15px; display: inline-block;
         }
 
-        @media (max-width: 768px) {
-            .dashboard { grid-template-columns: 1fr; }
+        #cookie-progress {
+            font-size: 0.8rem; margin-top: 10px; color: var(--secondary); font-weight: bold;
         }
+
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body onload="init()">
@@ -124,16 +116,20 @@
         
         <div class="flex-col">
             <div class="card" style="margin-bottom: 20px;">
-                <h2>🍪 Aquecer Navegador</h2>
-                <p class="data-label">Abre 15 sites e-commerce para gerar histórico.</p>
-                <button class="btn-outline" onclick="aquecerCookies()">🔥 Abrir Sites de Aquecimento</button>
+                <h2>🍪 Aquecimento Inteligente</h2>
+                <div class="input-group">
+                    <label class="data-label">QTD SITES (MAX 30)</label>
+                    <input type="number" id="cookie-qty" value="15" max="30">
+                </div>
+                <button class="btn-outline" id="btn-cookies" onclick="aquecerCookiesTemporizado()">🔥 Iniciar Fluxo de Aquecimento</button>
+                <div id="cookie-progress"></div>
             </div>
 
             <div class="card">
-                <h2>🏢 Dados Reais (Receita)</h2>
-                <div id="status-ip" class="status-badge">Detectando localização...</div>
+                <h2>🏢 Dados Reais (Mantidos)</h2>
+                <div id="status-ip" class="status-badge">Detectando IP...</div>
                 
-                <div id="loader" style="display:none; color: var(--primary);">Consultando Receita Federal...</div>
+                <div id="loader" style="display:none; color: var(--primary); font-size: 0.8rem;">Buscando na Receita...</div>
 
                 <div id="area-dados">
                     <div class="data-row">
@@ -153,7 +149,7 @@
                         <button class="btn-secondary" onclick="copy('f-cep')">Copiar</button>
                     </div>
                     <div class="data-row">
-                        <div><span class="data-label">CIDADE / UF / CEP</span><div class="data-content" id="f-cidade-cep">...</div></div>
+                        <div><span class="data-label">CIDADE / UF</span><div class="data-content" id="f-cidade-cep">...</div></div>
                         <button class="btn-secondary" onclick="copy('f-cidade-cep')">Copiar</button>
                     </div>
                     <div class="data-row">
@@ -161,16 +157,18 @@
                         <button class="btn-secondary" onclick="copy('f-tel')">Copiar</button>
                     </div>
                 </div>
-                <button class="btn-primary" style="margin-top: 15px;" onclick="buscarEmpresaReal()">Gerar Nova Empresa Real</button>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="buscarEmpresaReal()">Gerar Novos Dados</button>
             </div>
         </div>
 
         <div class="card">
-            <h2>🎯 Aquecer Pixel TikTok</h2>
-            <input type="text" id="pixel-id" placeholder="ID do Pixel TikTok">
+            <h2>🎯 Pixel TikTok (Sem Refresh)</h2>
+            <div class="input-group">
+                <input type="text" id="pixel-id" placeholder="Digite o ID do Pixel">
+            </div>
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn-success" style="flex:1" onclick="loadPixel()">Carregar Pixel</button>
-                <button id="toggle-auto-mode" class="btn-outline" style="flex:1">Modo Automático</button>
+                <button class="btn-success" style="flex:1" onclick="ativarPixelSemReiniciar()">Ativar Pixel</button>
+                <button id="toggle-auto-mode" class="btn-outline" style="flex:1">Auto Mode</button>
             </div>
 
             <div class="pixel-grid">
@@ -179,124 +177,128 @@
                 <button class="btn-secondary" onclick="trackEvent('InitiateCheckout')">Checkout</button>
                 <button class="btn-secondary" onclick="trackEvent('AddPaymentInfo')">Add Payment</button>
                 <button class="btn-secondary" onclick="trackEvent('CompleteRegistration')">Registration</button>
-                <button class="btn-primary" onclick="trackEvent('Purchase', 197)">PURCHASE (R$197)</button>
+                <button class="btn-primary" onclick="trackEvent('Purchase', 197)">PURCHASE</button>
             </div>
-            <div id="pixel-status" style="margin-top: 15px; font-size: 0.8rem; color: #64748b; text-align: center;">Aguardando ID...</div>
+            <div id="pixel-status" style="margin-top: 15px; font-size: 0.8rem; color: #64748b; text-align: center;">Pixel Inativo</div>
         </div>
 
     </div>
 
     <script>
-        // CONFIGURAÇÕES GERAIS
-        const listaSites = ["https://www.g1.globo.com", "https://www.uol.com.br", "https://www.mercadolivre.com.br", "https://www.amazon.com.br", "https://www.magazineluiza.com.br", "https://www.americanas.com.br", "https://www.casasbahia.com.br", "https://www.netshoes.com.br", "https://www.olx.com.br", "https://www.booking.com", "https://www.extra.com.br", "https://www.submarino.com.br", "https://www.ponto.com.br", "https://www.shopee.com.br", "https://www.havan.com.br"];
+        const listaSites = ["https://www.g1.globo.com", "https://www.uol.com.br", "https://www.mercadolivre.com.br", "https://www.amazon.com.br", "https://www.magazineluiza.com.br", "https://www.americanas.com.br", "https://www.casasbahia.com.br", "https://www.netshoes.com.br", "https://www.olx.com.br", "https://www.booking.com", "https://www.extra.com.br", "https://www.submarino.com.br", "https://www.ponto.com.br", "https://www.shopee.com.br", "https://www.havan.com.br", "https://www.r7.com", "https://www.kabum.com.br", "https://www.enjoei.com.br", "https://www.dafiti.com.br", "https://www.zattini.com.br"];
+        
         let dddLocal = "11";
+        let autoMode = false;
+        let autoInterval;
 
         function init() {
-            const savedPixel = new URLSearchParams(window.location.search).get('pixel_id');
-            if (savedPixel) {
-                document.getElementById('pixel-id').value = savedPixel;
-                injectTikTokScript(savedPixel);
-            }
             detectarLocalizacao();
         }
 
-        // --- FUNÇÕES DE DADOS ---
+        // --- SOLUÇÃO PARA NÃO REINICIAR A PÁGINA ---
+        function ativarPixelSemReiniciar() {
+            const id = document.getElementById('pixel-id').value;
+            if (!id) return alert("Insira o ID do Pixel");
+            
+            // Injeta o script sem dar reload
+            if (!window.ttq) {
+                injectTikTokScript(id);
+            } else {
+                // Se o script já existe, apenas carrega o novo ID
+                ttq.load(id);
+                ttq.page();
+            }
+            document.getElementById('pixel-status').innerText = "✅ Pixel " + id + " ativo nos dados atuais!";
+            document.getElementById('pixel-status').style.color = var(--primary);
+        }
+
+        function injectTikTokScript(id) {
+            !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.load=function(e){var n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://analytics.tiktok.com/i18n/pixel/events.js?sdkid="+e+"&lib="+t;var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(n,r)};
+            ttq.load(id); ttq.page();
+            }(window,document,'ttq');
+        }
+
+        // --- MELHORIA DOS COOKIES (TEMPORIZADO) ---
+        async function aquecerCookiesTemporizado() {
+            const qty = document.getElementById('cookie-qty').value;
+            const selecionados = [...listaSites].sort(() => 0.5 - Math.random()).slice(0, qty);
+            const btn = document.getElementById('btn-cookies');
+            const progresso = document.getElementById('cookie-progress');
+            
+            btn.disabled = true;
+            btn.innerText = "⏳ Aquecendo...";
+
+            for (let i = 0; i < selecionados.length; i++) {
+                progresso.innerText = `Abrindo site ${i + 1} de ${selecionados.length}...`;
+                window.open(selecionados[i], '_blank');
+                // Espera 5 segundos antes de abrir o próximo
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+
+            progresso.innerText = "✅ Aquecimento Concluído!";
+            btn.disabled = false;
+            btn.innerText = "🔥 Iniciar Fluxo de Aquecimento";
+        }
+
+        // --- BUSCA DE DADOS ---
         async function detectarLocalizacao() {
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
-                dddLocal = data.languages ? data.country_calling_code.replace('+','') : "11"; 
-                // Simplificação para DDD Brasil baseado na região
                 const dddMap = {"SP":"11","RJ":"21","MG":"31","PR":"41","RS":"51","SC":"48","BA":"71","PE":"81","CE":"85","DF":"61"};
                 dddLocal = dddMap[data.region_code] || "11";
-                document.getElementById('status-ip').innerText = `📍 ${data.city}, ${data.region_code} (IP: ${data.ip})`;
+                document.getElementById('status-ip').innerText = `📍 ${data.city}, ${data.region_code}`;
                 buscarEmpresaReal();
-            } catch (e) { document.getElementById('status-ip').innerText = "Erro ao localizar IP"; }
+            } catch (e) { console.log("Erro IP"); }
         }
 
         async function buscarEmpresaReal() {
             document.getElementById('loader').style.display = 'block';
-            document.getElementById('area-dados').style.opacity = '0.3';
-            
             try {
-                // Semente aleatória para buscar CNPJs reais na BrasilAPI
-                const randomPrefix = Math.floor(Math.random() * 80000000) + 10000000;
+                const randomPrefix = Math.floor(Math.random() * 70000000) + 10000000;
                 const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${randomPrefix}000100`);
                 const data = await res.json();
 
                 if (data.cnpj) {
                     document.getElementById('f-razao').innerText = data.razao_social;
                     document.getElementById('f-cnpj').innerText = data.cnpj;
-                    // FORMATAÇÃO SOLICITADA: RUA, NUMERO, BAIRRO
                     document.getElementById('f-endereco-full').innerText = `${data.logradouro}, ${data.numero}, ${data.bairro}`;
-                    document.getElementById('f-cep').innerText = `${data.cep}`;
+                    document.getElementById('f-cep').innerText = data.cep;
                     document.getElementById('f-cidade-cep').innerText = `${data.municipio} / ${data.uf}`;
-                    
-                    // TELEFONE: Usa o da Receita ou gera um com DDD local
-                    let tel = data.ddd_telefone_1 || (dddLocal + "9" + Math.floor(10000000 + Math.random() * 90000000));
-                    document.getElementById('f-tel').innerText = tel;
+                    document.getElementById('f-tel').innerText = data.ddd_telefone_1 || (dddLocal + "9" + Math.floor(10000000 + Math.random() * 90000000));
                 } else { buscarEmpresaReal(); }
             } catch (e) { buscarEmpresaReal(); }
-            
             document.getElementById('loader').style.display = 'none';
-            document.getElementById('area-dados').style.opacity = '1';
-        }
-
-        // --- FUNÇÕES PIXEL ---
-        function loadPixel() {
-            const id = document.getElementById('pixel-id').value;
-            if (id) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('pixel_id', id);
-                window.history.pushState({}, '', url);
-                location.reload();
-            }
-        }
-
-        function injectTikTokScript(id) {
-            !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.load=function(e){var n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://analytics.tiktok.com/i18n/pixel/events.js?sdkid="+e+"&lib="+t;var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(n,r)};
-            ttq.load(id); ttq.page();
-            document.getElementById('pixel-status').innerText = "✅ Pixel " + id + " Ativo";
-            }(window,document,'ttq');
         }
 
         function trackEvent(ev, val=0) {
             if(window.ttq) {
                 ttq.track(ev, { value: val, currency: 'BRL' });
-                console.log(`Evento ${ev} enviado.`);
-            } else { alert("Carregue o pixel primeiro!"); }
-        }
-
-        // --- UTILITÁRIOS ---
-        function aquecerCookies() {
-            const selecionados = [...listaSites].sort(() => 0.5 - Math.random()).slice(0, 15);
-            selecionados.forEach(url => window.open(url, '_blank'));
+                alert(`Evento ${ev} disparado!`);
+            } else { alert("Ative o Pixel primeiro!"); }
         }
 
         function copy(id) {
             const txt = document.getElementById(id).innerText;
             navigator.clipboard.writeText(txt);
             const btn = window.event.target;
-            btn.innerText = "Copiado!";
-            setTimeout(() => btn.innerText = "Copiar", 1000);
+            btn.innerText = "OK!";
+            setTimeout(() => btn.innerText = "Copiar", 800);
         }
 
-        // Modo Automático
-        let autoMode = false;
-        let interval;
         document.getElementById('toggle-auto-mode').onclick = function() {
             autoMode = !autoMode;
             if(autoMode) {
                 this.className = "btn-success";
-                this.innerText = "Rodando...";
-                interval = setInterval(() => {
+                this.innerText = "ON";
+                autoInterval = setInterval(() => {
                     const evs = ["ViewContent", "AddToCart", "InitiateCheckout"];
                     trackEvent(evs[Math.floor(Math.random()*evs.length)]);
-                }, 5000);
+                }, 7000);
             } else {
                 this.className = "btn-outline";
-                this.innerText = "Modo Automático";
-                clearInterval(interval);
+                this.innerText = "Auto Mode";
+                clearInterval(autoInterval);
             }
         };
     </script>
