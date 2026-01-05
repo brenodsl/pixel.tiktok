@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ads Manager Pro - Estável</title>
+    <title>Ads Manager Pro - V3 (Com CEP)</title>
     <style>
         :root {
             --primary: #00f2ea;
@@ -81,10 +81,13 @@
             border-left: 3px solid var(--primary);
         }
 
+        .data-label { font-size: 0.65rem; color: #94a3b8; display: block; margin-bottom: 2px; }
         .data-content { font-family: monospace; font-size: 0.85rem; }
         .pixel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         #status-ip { color: var(--secondary); font-size: 0.8rem; margin-bottom: 10px; font-weight: bold; }
         #cookie-progress { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
+
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -103,10 +106,11 @@
                 <h2>🏢 Dados da Empresa</h2>
                 <div id="status-ip">Localizando IP...</div>
                 <div id="area-dados">
-                    <div class="data-row"><div><span id="f-razao">...</span></div><button class="btn-secondary" onclick="copy('f-razao')">Copiar</button></div>
-                    <div class="data-row"><div><span id="f-cnpj">...</span></div><button class="btn-secondary" onclick="copy('f-cnpj')">Copiar</button></div>
-                    <div class="data-row"><div><span id="f-endereco-full">...</span></div><button class="btn-secondary" onclick="copy('f-endereco-full')">Copiar</button></div>
-                    <div class="data-row"><div><span id="f-tel">...</span></div><button class="btn-secondary" onclick="copy('f-tel')">Copiar</button></div>
+                    <div class="data-row"><div><span class="data-label">RAZÃO SOCIAL</span><span id="f-razao">...</span></div><button class="btn-secondary" onclick="copy('f-razao')">Copiar</button></div>
+                    <div class="data-row"><div><span class="data-label">CNPJ</span><span id="f-cnpj">...</span></div><button class="btn-secondary" onclick="copy('f-cnpj')">Copiar</button></div>
+                    <div class="data-row"><div><span class="data-label">ENDEREÇO (RUA, Nº, BAIRRO)</span><span id="f-endereco-full">...</span></div><button class="btn-secondary" onclick="copy('f-endereco-full')">Copiar</button></div>
+                    <div class="data-row"><div><span class="data-label">CEP</span><span id="f-cep">...</span></div><button class="btn-secondary" onclick="copy('f-cep')">Copiar</button></div>
+                    <div class="data-row"><div><span class="data-label">WHATSAPP</span><span id="f-tel">...</span></div><button class="btn-secondary" onclick="copy('f-tel')">Copiar</button></div>
                 </div>
                 <button class="btn-primary" onclick="buscarEmpresaReal()">Gerar Novos Dados</button>
             </div>
@@ -127,50 +131,48 @@
     </div>
 
     <script>
-        const sites = ["https://www.google.com", "https://www.mercadolivre.com.br", "https://www.uol.com.br", "https://www.g1.globo.com", "https://www.amazon.com.br", "https://www.americanas.com.br", "https://www.magazineluiza.com.br", "https://www.youtube.com"];
+        const sites = ["https://www.google.com", "https://www.mercadolivre.com.br", "https://www.uol.com.br", "https://www.g1.globo.com", "https://www.amazon.com.br", "https://www.americanas.com.br", "https://www.magazineluiza.com.br", "https://www.youtube.com", "https://www.shopee.com.br"];
         let dddGlobal = "11";
 
-        // 1. Localização (Usando API mais estável)
         async function init() {
             try {
                 const r = await fetch('https://ipwho.is/');
                 const d = await r.json();
                 if(d.success) {
                     document.getElementById('status-ip').innerText = `📍 ${d.city}/${d.region_code} - IP: ${d.ip}`;
-                    // Mapeamento simples de DDD
-                    const ddds = {"Sao Paulo":"11","Rio de Janeiro":"21","Minas Gerais":"31","Bahia":"71"};
-                    dddGlobal = ddds[d.region] || "11";
+                    dddGlobal = d.calling_code || "11"; 
                     buscarEmpresaReal();
                 }
             } catch(e) { 
-                document.getElementById('status-ip').innerText = "Erro ao carregar IP. Tente recarregar.";
+                document.getElementById('status-ip').innerText = "Erro ao carregar IP.";
+                buscarEmpresaReal();
             }
         }
 
-        // 2. Dados Reais
         async function buscarEmpresaReal() {
-            const razao = document.getElementById('f-razao');
-            razao.innerText = "Buscando...";
+            document.getElementById('f-razao').innerText = "Buscando...";
             try {
+                // Semente de CNPJ aleatória
                 const rando = Math.floor(Math.random() * 50000000) + 10000000;
                 const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${rando}000100`);
                 const d = await r.json();
+                
                 if(d.cnpj) {
                     document.getElementById('f-razao').innerText = d.razao_social;
                     document.getElementById('f-cnpj').innerText = d.cnpj;
                     document.getElementById('f-endereco-full').innerText = `${d.logradouro}, ${d.numero}, ${d.bairro}`;
+                    document.getElementById('f-cep').innerText = d.cep;
                     document.getElementById('f-tel').innerText = d.ddd_telefone_1 || (dddGlobal + "9" + Math.floor(Math.random()*90000000 + 10000000));
                 } else { buscarEmpresaReal(); }
             } catch(e) { buscarEmpresaReal(); }
         }
 
-        // 3. Cookies (Correção do loop e bloqueio)
         async function aquecerCookies() {
             const qty = document.getElementById('cookie-qty').value;
             const progress = document.getElementById('cookie-progress');
             const lista = [...sites].sort(() => 0.5 - Math.random()).slice(0, qty);
             
-            alert("Atenção: O navegador vai pedir permissão para abrir pop-ups. ACEITE para funcionar.");
+            alert("Clique em OK e aceite os pop-ups no topo do navegador.");
 
             for(let i=0; i < lista.length; i++) {
                 progress.innerText = `Abrindo ${i+1} de ${lista.length}...`;
@@ -180,7 +182,6 @@
             progress.innerText = "✅ Concluído!";
         }
 
-        // 4. Pixel (Sem Reload)
         function ativarPixel() {
             const id = document.getElementById('pixel-id').value;
             if(!id) return alert("Digite o ID");
@@ -190,21 +191,24 @@
                 ttq.load(id);
                 ttq.page();
             }(window,document,'ttq');
-        }
-            document.getElementById('pixel-log').innerText = `✅ Pixel ${id} Carregado!`;
+            
+            document.getElementById('pixel-log').innerText = `✅ Pixel ${id} Ativado!`;
         }
 
         function trackEvent(name, val=0) {
             if(window.ttq) {
                 ttq.track(name, { value: val, currency: 'BRL' });
                 document.getElementById('pixel-log').innerText = `🚀 Evento ${name} enviado!`;
-            } else { alert("Ative o pixel primeiro no botão verde!"); }
+            } else { alert("Ative o pixel primeiro!"); }
         }
 
         function copy(id) {
             const text = document.getElementById(id).innerText;
             navigator.clipboard.writeText(text);
-            alert("Copiado!");
+            const btn = window.event.target;
+            const original = btn.innerText;
+            btn.innerText = "OK!";
+            setTimeout(() => btn.innerText = original, 800);
         }
 
         window.onload = init;
