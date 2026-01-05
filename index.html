@@ -161,29 +161,13 @@
             };
         
             const textoBackup =
-        `
-        PIXEL TIKTOK:
-        ${dados.pixel}
-        
-        RAZÃO SOCIAL:
-        ${dados.razao}
-        
-        CNPJ:
-        ${dados.cnpj}
-        
-        ENDEREÇO:
-        ${dados.endereco}
-        
-        CEP:
-        ${dados.cep}
-        
-        WHATSAPP:
-        ${dados.whatsapp}
-        
-        DATA:
-        ${new Date().toLocaleString()}
-        
-        `;
+`PIXEL TIKTOK:${dados.pixel}
+RAZÃO SOCIAL:${dados.razao}
+CNPJ:${dados.cnpj}
+ENDEREÇO:${dados.endereco}
+CEP:${dados.cep}
+WHATSAPP:${dados.whatsapp}
+DATA:${new Date().toLocaleString()}`;
         
             navigator.clipboard.writeText(textoBackup).then(() => {
                 alert("✅ Todas as informações foram copiadas com sucesso!");
