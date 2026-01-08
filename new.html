@@ -1,760 +1,105 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ads Manager Pro - V4 (Com Fingerprint Analytics)</title>
+    <title>Elite Ads - Fingerprint Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #00f2ea;
-            --secondary: #ff0050;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #334155;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .dashboard {
-            width: 100%;
-            max-width: 1200px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid var(--accent);
-        }
-
-        .full-width { grid-column: 1 / -1; }
-
-        h2 { color: var(--primary); margin-top: 0; font-size: 1.2rem; }
-        h3 { color: var(--text); font-size: 1rem; margin: 15px 0 10px; }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            color: white;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 600;
-            transition: 0.2s;
-            width: 100%;
-            margin-bottom: 5px;
-        }
-
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: #000; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-secondary { background: var(--accent); color: white; width: auto; padding: 5px 10px; font-size: 0.8rem; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-
-        .data-row {
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 3px solid var(--primary);
-        }
-
-        .fingerprint-row {
-            border-left-color: var(--warning);
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
-        }
-
-        .data-label { font-size: 0.65rem; color: #94a3b8; display: block; margin-bottom: 2px; }
-        .data-content { font-family: monospace; font-size: 0.85rem; }
-        
-        .score-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-align: center;
-            min-width: 60px;
-        }
-        
-        .score-low { background: #ef4444; color: white; }
-        .score-medium { background: #f59e0b; color: #000; }
-        .score-high { background: #10b981; color: white; }
-        
-        .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        
-        .status-safe { background: var(--success); }
-        .status-warning { background: var(--warning); }
-        .status-danger { background: var(--danger); }
-        
-        .fingerprint-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .fingerprint-item {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--accent);
-        }
-        
-        #status-ip { color: var(--secondary); font-size: 0.8rem; margin-bottom: 10px; font-weight: bold; }
-        #cookie-progress { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
-        #fp-progress { font-size: 0.8rem; color: #94a3b8; margin: 10px 0; }
-
-        .alert-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: 8px;
-            padding: 12px;
-            margin: 15px 0;
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 768px) { 
-            .dashboard { grid-template-columns: 1fr; } 
-            .fingerprint-grid { grid-template-columns: 1fr; }
-        }
+        .status-card { transition: all 0.3s ease; }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-white font-sans min-h-screen">
 
-    <div class="dashboard">
-        
-        <!-- COLUNA ESQUERDA -->
-        <div class="flex-col">
-            <!-- AQUECER NAVEGADOR -->
-            <div class="card" style="margin-bottom: 20px;">
-                <h2>🍪 Aquecer Navegador</h2>
-                <input type="number" id="cookie-qty" value="5" placeholder="Qtd sites">
-                <button class="btn-outline" onclick="aquecerCookies()">🔥 Abrir Sites (Intervalo 5s)</button>
-                <div id="cookie-progress">Aguardando comando...</div>
-                
-                <div class="alert-box">
-                    <strong>⚠️ Atenção:</strong> O aquecimento de cookies pode aumentar seu "Suspect Score" no Fingerprint. Use com moderação entre diferentes perfis.
+    <div class="container mx-auto px-4 py-10">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-blue-500 mb-2">Elite Ads Contingência</h1>
+            <p class="text-slate-400">Verificador de Integridade de Perfil (Fingerprint.com API)</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto">
+            <div id="main-status" class="status-card bg-slate-800 border border-slate-700 rounded-xl p-8 mb-6 text-center">
+                <div id="loader" class="text-xl">Iniciando escaneamento de hardware...</div>
+                <div id="results" class="hidden">
+                    <h2 class="text-2xl font-semibold mb-4 text-slate-300">ID ÚNICO DO DISPOSITIVO:</h2>
+                    <div id="visitor-id" class="text-3xl font-mono text-yellow-400 break-all mb-4">---</div>
+                    <div id="score-badge" class="inline-block px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest">
+                        Analisando Score...
+                    </div>
                 </div>
             </div>
 
-            <!-- DADOS DA EMPRESA -->
-            <div class="card">
-                <h2>🏢 Dados da Empresa</h2>
-                <div id="status-ip">Localizando IP...</div>
-                <div id="area-dados">
-                    <div class="data-row"><div><span class="data-label">RAZÃO SOCIAL</span><span id="f-razao">...</span></div><button class="btn-secondary" onclick="copy('f-razao')">Copiar</button></div>
-                    <div class="data-row"><div><span class="data-label">CNPJ</span><span id="f-cnpj">...</span></div><button class="btn-secondary" onclick="copy('f-cnpj')">Copiar</button></div>
-                    <div class="data-row"><div><span class="data-label">ENDEREÇO</span><span id="f-endereco-full">...</span></div><button class="btn-secondary" onclick="copy('f-endereco-full')">Copiar</button></div>
-                    <div class="data-row"><div><span class="data-label">CEP</span><span id="f-cep">...</span></div><button class="btn-secondary" onclick="copy('f-cep')">Copiar</button></div>
-                    <div class="data-row"><div><span class="data-label">WHATSAPP</span><span id="f-tel">...</span></div><button class="btn-secondary" onclick="copy('f-tel')">Copiar</button></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-800 p-5 rounded-lg border border-slate-700">
+                    <h3 class="text-blue-400 font-bold mb-3 border-b border-slate-700 pb-2">🌐 Conexão e IP</h3>
+                    <ul id="network-data" class="space-y-2 text-sm text-slate-300">
+                        <li>Aguardando dados...</li>
+                    </ul>
                 </div>
-                <button class="btn-primary" onclick="buscarEmpresaReal()">Gerar Novos Dados</button>
-                <button class="btn-outline" onclick="copiarTudo()">📋 Copiar TODAS as Informações</button>
-            </div>
-        </div>
 
-        <!-- COLUNA DIREITA -->
-        <div class="flex-col">
-            <!-- PIXEL TIKTOK -->
-            <div class="card" style="margin-bottom: 20px;">
-                <h2>🎯 Pixel TikTok</h2>
-                <input type="text" id="pixel-id" placeholder="ID do Pixel">
-                <button class="btn-success" onclick="ativarPixel()">1. Ativar Pixel</button>
-                <div class="pixel-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
-                    <button class="btn-secondary" onclick="trackEvent('ViewContent')">View Content</button>
-                    <button class="btn-secondary" onclick="trackEvent('AddToCart')">Add to Cart</button>
-                    <button class="btn-secondary" onclick="trackEvent('InitiateCheckout')">Checkout</button>
-                    <button class="btn-primary" onclick="trackEvent('Purchase', 197)">PURCHASE</button>
+                <div class="bg-slate-800 p-5 rounded-lg border border-slate-700">
+                    <h3 class="text-blue-400 font-bold mb-3 border-b border-slate-700 pb-2">💻 Hardware & Browser</h3>
+                    <ul id="hardware-data" class="space-y-2 text-sm text-slate-300">
+                        <li>Aguardando dados...</li>
+                    </ul>
                 </div>
-                <p id="pixel-log" style="font-size: 0.7rem; color: #64748b; margin-top: 10px;">Status: Off</p>
             </div>
 
-            <!-- FINGERPRINT ANALYTICS -->
-            <div class="card">
-                <h2>🔍 Fingerprint Analytics</h2>
-                
-                <div class="alert-box">
-                    <strong>💡 Como usar:</strong> Insira sua API Key do Fingerprint.com para monitorar o "Suspect Score" e dados do dispositivo. Isso ajuda a evitar cruzamento de dados entre perfis.
-                </div>
-                
-                <input type="password" id="fp-api-key" placeholder="Sua API Key do Fingerprint.com">
-                <button class="btn-warning" onclick="initFingerprint()">🔓 Inicializar Fingerprint</button>
-                
-                <div id="fp-progress">Aguardando inicialização...</div>
-                
-                <!-- RESULTADOS DO FINGERPRINT -->
-                <div id="fp-results" style="display: none;">
-                    <h3>📊 Status do Dispositivo</h3>
-                    
-                    <div class="fingerprint-row">
-                        <div>
-                            <span class="data-label">VISITOR ID</span>
-                            <span id="fp-visitor-id" class="data-content">Carregando...</span>
-                        </div>
-                        <div id="fp-score-badge" class="score-badge score-medium">?</div>
-                    </div>
-                    
-                    <div class="fingerprint-grid">
-                        <div class="fingerprint-item">
-                            <span class="data-label">SCORE DE RISCO</span>
-                            <div style="display: flex; align-items: center; margin-top: 5px;">
-                                <span id="fp-score-value" class="data-content">0</span>
-                                <span id="fp-score-desc" style="margin-left: 8px; font-size: 0.75rem;">-</span>
-                            </div>
-                        </div>
-                        
-                        <div class="fingerprint-item">
-                            <span class="data-label">VPN / PROXY</span>
-                            <div style="display: flex; align-items: center; margin-top: 5px;">
-                                <span id="fp-vpn-status" class="data-content">Verificando...</span>
-                                <span id="fp-vpn-icon" class="status-dot status-safe"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="fingerprint-item">
-                            <span class="data-label">MODO INCOGNITO</span>
-                            <div style="display: flex; align-items: center; margin-top: 5px;">
-                                <span id="fp-incognito" class="data-content">Verificando...</span>
-                                <span id="fp-incognito-icon" class="status-dot status-safe"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="fingerprint-item">
-                            <span class="data-label">BROWSER TAMPERING</span>
-                            <div style="display: flex; align-items: center; margin-top: 5px;">
-                                <span id="fp-tampering" class="data-content">Verificando...</span>
-                                <span id="fp-tampering-icon" class="status-dot status-safe"></span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h3>📍 Geolocalização</h3>
-                    <div class="data-row">
-                        <div>
-                            <span class="data-label">LOCALIZAÇÃO DETECTADA</span>
-                            <span id="fp-location" class="data-content">Carregando...</span>
-                        </div>
-                        <button class="btn-secondary" onclick="copy('fp-location')">Copiar</button>
-                    </div>
-                    
-                    <div class="data-row">
-                        <div>
-                            <span class="data-label">IP PÚBLICO</span>
-                            <span id="fp-ip" class="data-content">Carregando...</span>
-                        </div>
-                        <button class="btn-secondary" onclick="copy('fp-ip')">Copiar</button>
-                    </div>
-                    
-                    <button class="btn-outline" onclick="refreshFingerprint()">🔄 Atualizar Análise</button>
-                    <button class="btn-secondary" onclick="exportFingerprintData()">📥 Exportar Dados FP</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- LOGS E RECOMENDAÇÕES -->
-        <div class="card full-width">
-            <h2>📝 Logs e Recomendações</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h3>⚠️ Alertas de Segurança</h3>
-                    <div id="security-alerts" style="font-size: 0.85rem; color: #94a3b8;">
-                        <p>• Aguardando análise do Fingerprint...</p>
-                    </div>
-                </div>
-                <div>
-                    <h3>💡 Recomendações para Multi-Perfis</h3>
-                    <div id="recommendations" style="font-size: 0.85rem;">
-                        <p>✅ <strong>Score baixo (0-30):</strong> Perfil seguro para uso</p>
-                        <p>⚠️ <strong>Score médio (31-70):</strong> Use com cautela, evite ações sensíveis</p>
-                        <p>🚫 <strong>Score alto (71-100):</strong> Troque de perfil/IP antes de continuar</p>
-                        <p>🔁 <strong>Dica:</strong> Aguarde 15 min entre trocas de perfil com scores altos</p>
-                    </div>
-                </div>
+            <div class="mt-8 text-center">
+                <button onclick="window.location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold transition">
+                    REPETIR TESTE
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES
-        const FP_PUBLIC_KEY = 'public_VSirM0UGucG5OTdlJdXY'; // Você vai inserir sua key aqui ou via input
-        let fingerprintClient = null;
-        let currentVisitorId = null;
-        
-        // Lista de sites para aquecimento
-        const sites = [
-            "https://www.google.com", 
-            "https://www.mercadolivre.com.br", 
-            "https://www.uol.com.br", 
-            "https://www.g1.globo.com", 
-            "https://www.amazon.com.br", 
-            "https://www.americanas.com.br", 
-            "https://www.magazineluiza.com.br", 
-            "https://www.youtube.com", 
-            "https://www.shopee.com.br"
-        ];
-        
-        let dddGlobal = "11";
+      const fpPromise = import('https://fpjscdn.net/v3/VSirM0UGucG5OTdlJdXY')
+        .then(FingerprintJS => FingerprintJS.load())
 
-        // INICIALIZAÇÃO DO SISTEMA
-        async function init() {
-            try {
-                // Geolocalização básica
-                const r = await fetch('https://ipapi.co/json/');
-                const d = await r.json();
-                if(d.ip) {
-                    document.getElementById('status-ip').innerText = `📍 ${d.city}/${d.region} - IP: ${d.ip}`;
-                    dddGlobal = d.country_calling_code || "55";
-                    buscarEmpresaReal();
-                }
-            } catch(e) { 
-                document.getElementById('status-ip').innerText = "Erro ao carregar IP. Usando dados locais.";
-                buscarEmpresaReal();
-            }
-        }
+      fpPromise
+        .then(fp => fp.get({extendedResult: true}))
+        .then(result => {
+          document.getElementById('loader').classList.add('hidden');
+          document.getElementById('results').classList.remove('hidden');
 
-        // BUSCAR EMPRESA REAL (simulação)
-        async function buscarEmpresaReal() {
-            document.getElementById('f-razao').innerText = "Buscando...";
-            try {
-                // Simulação de dados de empresa
-                const empresas = [
-                    { razao: "TECH SOLUTIONS LTDA", cnpj: "12.345.678/0001-90", endereco: "Av. Paulista, 1000, Bela Vista", cep: "01310-100", tel: dddGlobal + "98765-4321" },
-                    { razao: "DIGITAL MARKETING EIRELI", cnpj: "98.765.432/0001-10", endereco: "R. Augusta, 500, Consolação", cep: "01305-000", tel: dddGlobal + "91234-5678" },
-                    { razao: "ADS POWER CONSULTORIA", cnpj: "45.678.912/0001-34", endereco: "R. da Consolação, 2000, Centro", cep: "01302-000", tel: dddGlobal + "99876-5432" }
-                ];
-                
-                const randomEmpresa = empresas[Math.floor(Math.random() * empresas.length)];
-                
-                document.getElementById('f-razao').innerText = randomEmpresa.razao;
-                document.getElementById('f-cnpj').innerText = randomEmpresa.cnpj;
-                document.getElementById('f-endereco-full').innerText = randomEmpresa.endereco;
-                document.getElementById('f-cep').innerText = randomEmpresa.cep;
-                document.getElementById('f-tel').innerText = randomEmpresa.tel;
-                
-            } catch(e) { 
-                document.getElementById('f-razao').innerText = "Erro ao buscar dados";
-            }
-        }
+          // Exibe VisitorID
+          document.getElementById('visitor-id').innerText = result.visitorId;
 
-        // INICIALIZAR FINGERPRINT.COM
-        async function initFingerprint() {
-            const apiKey = document.getElementById('fp-api-key').value.trim();
-            
-            if (!apiKey) {
-                alert("Por favor, insira sua API Key do Fingerprint.com");
-                return;
-            }
-            
-            document.getElementById('fp-progress').innerText = "Inicializando Fingerprint JS Agent...";
-            document.getElementById('fp-progress').style.color = "#f59e0b";
-            
-            try {
-                // Carregar o script do Fingerprint
-                await loadFingerprintScript(apiKey);
-                
-                // Inicializar o cliente
-                const FPAgent = await import('https://fpjscdn.net/v3/' + apiKey)
-                    .catch(e => {
-                        console.error("Erro ao carregar Fingerprint:", e);
-                        throw new Error("Falha ao carregar biblioteca");
-                    });
-                
-                // Se a biblioteca carregar corretamente, inicializamos
-                fingerprintClient = FPAgent;
-                
-                // Obter o visitor ID
-                const result = await FPAgent.get();
-                currentVisitorId = result.visitorId;
-                
-                // Atualizar a interface
-                updateFingerprintUI(result);
-                
-                document.getElementById('fp-progress').innerText = "✅ Fingerprint inicializado com sucesso!";
-                document.getElementById('fp-progress').style.color = "#10b981";
-                document.getElementById('fp-results').style.display = 'block';
-                
-                // Gerar alertas baseados no score
-                generateSecurityAlerts(result);
-                
-            } catch (error) {
-                console.error("Erro no Fingerprint:", error);
-                document.getElementById('fp-progress').innerText = "❌ Erro ao inicializar Fingerprint. Verifique a API Key.";
-                document.getElementById('fp-progress').style.color = "#ef4444";
-                
-                // Modo de simulação para demonstração
-                simulateFingerprintData();
-            }
-        }
+          // Lógica de Score de Confiança (Mock based on extended results)
+          const badge = document.getElementById('score-badge');
+          if (result.incognito) {
+              badge.innerText = "ALTO RISCO: NAVEGADOR INCÓGNITO";
+              badge.classList.add('bg-red-500', 'text-white');
+          } else {
+              badge.innerText = "SCORE DE CONFIANÇA ACEITÁVEL";
+              badge.classList.add('bg-green-500', 'text-white');
+          }
 
-        // FUNÇÃO PARA CARREGAR SCRIPT DO FINGERPRINT
-        function loadFingerprintScript(apiKey) {
-            return new Promise((resolve, reject) => {
-                if (window.FingerprintJS) {
-                    resolve();
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = `https://fpjscdn.net/v3/${apiKey}`;
-                script.async = true;
-                
-                script.onload = resolve;
-                script.onerror = reject;
-                
-                document.head.appendChild(script);
-            });
-        }
+          // Dados de Rede
+          document.getElementById('network-data').innerHTML = `
+              <li><strong>IP:</strong> ${result.ip}</li>
+              <li><strong>Cidade:</strong> ${result.ipLocation?.city?.name || 'N/A'}</li>
+              <li><strong>Provedor (ISP):</strong> ${result.ipLocation?.subdivisions?.[0]?.name || 'N/A'}</li>
+              <li><strong>VPN/Proxy:</strong> ${result.proxy ? '⚠️ Detectado' : '✅ Limpo'}</li>
+          `;
 
-        // ATUALIZAR UI COM DADOS DO FINGERPRINT
-        function updateFingerprintUI(data) {
-            // Visitor ID
-            document.getElementById('fp-visitor-id').textContent = 
-                data.visitorId ? data.visitorId.substring(0, 16) + '...' : 'Não detectado';
-            
-            // Suspect Score (exemplo - a API real retornaria isso)
-            const suspectScore = data.suspectScore || Math.floor(Math.random() * 100);
-            document.getElementById('fp-score-value').textContent = suspectScore;
-            
-            // Atualizar badge do score
-            const scoreBadge = document.getElementById('fp-score-badge');
-            let scoreDesc = '';
-            
-            if (suspectScore <= 30) {
-                scoreBadge.className = 'score-badge score-high';
-                scoreBadge.textContent = 'BAIXO';
-                scoreDesc = '✅ Perfil seguro';
-            } else if (suspectScore <= 70) {
-                scoreBadge.className = 'score-badge score-medium';
-                scoreBadge.textContent = 'MÉDIO';
-                scoreDesc = '⚠️ Monitorar';
-            } else {
-                scoreBadge.className = 'score-badge score-low';
-                scoreBadge.textContent = 'ALTO';
-                scoreDesc = '🚫 Risco elevado';
-            }
-            
-            document.getElementById('fp-score-desc').textContent = scoreDesc;
-            
-            // Status de VPN
-            const vpnDetected = data.vpn || Math.random() > 0.7;
-            document.getElementById('fp-vpn-status').textContent = vpnDetected ? 'Detectado' : 'Não detectado';
-            document.getElementById('fp-vpn-icon').className = vpnDetected ? 
-                'status-dot status-danger' : 'status-dot status-safe';
-            
-            // Modo incognito
-            const incognitoDetected = data.incognito || Math.random() > 0.8;
-            document.getElementById('fp-incognito').textContent = incognitoDetected ? 'Sim' : 'Não';
-            document.getElementById('fp-incognito-icon').className = incognitoDetected ? 
-                'status-dot status-warning' : 'status-dot status-safe';
-            
-            // Browser tampering
-            const tamperingDetected = data.browserTampering || Math.random() > 0.9;
-            document.getElementById('fp-tampering').textContent = tamperingDetected ? 'Detectado' : 'Não detectado';
-            document.getElementById('fp-tampering-icon').className = tamperingDetected ? 
-                'status-dot status-danger' : 'status-dot status-safe';
-            
-            // Geolocalização
-            document.getElementById('fp-location').textContent = 
-                data.geolocation || 'São Paulo, Brazil';
-            document.getElementById('fp-ip').textContent = 
-                data.ip || document.getElementById('status-ip').textContent.split('IP: ')[1] || 'Não disponível';
-        }
-
-        // SIMULAR DADOS DO FINGERPRINT (para demonstração)
-        function simulateFingerprintData() {
-            document.getElementById('fp-progress').innerText = "⚠️ Usando modo de simulação (sem API Key válida)";
-            
-            const simulatedData = {
-                visitorId: 'sim-' + Math.random().toString(36).substring(2, 15),
-                suspectScore: Math.floor(Math.random() * 100),
-                vpn: Math.random() > 0.7,
-                incognito: Math.random() > 0.8,
-                browserTampering: Math.random() > 0.9,
-                geolocation: ['São Paulo, BR', 'Rio de Janeiro, BR', 'Curitiba, BR'][Math.floor(Math.random() * 3)],
-                ip: '189.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.1'
-            };
-            
-            updateFingerprintUI(simulatedData);
-            document.getElementById('fp-results').style.display = 'block';
-            generateSecurityAlerts(simulatedData);
-        }
-
-        // GERAR ALERTAS DE SEGURANÇA
-        function generateSecurityAlerts(data) {
-            const alertsDiv = document.getElementById('security-alerts');
-            alertsDiv.innerHTML = '';
-            
-            const suspectScore = data.suspectScore || parseInt(document.getElementById('fp-score-value').textContent);
-            
-            if (suspectScore > 70) {
-                alertsDiv.innerHTML += '<p style="color:#ef4444">🚫 <strong>ALTO RISCO:</strong> Score elevado. Recomendado trocar de perfil/IP imediatamente.</p>';
-            }
-            
-            if (data.vpn) {
-                alertsDiv.innerHTML += '<p style="color:#f59e0b">⚠️ <strong>VPN DETECTADA:</strong> Pode aumentar suspeitas em plataformas de anúncio.</p>';
-            }
-            
-            if (data.incognito) {
-                alertsDiv.innerHTML += '<p style="color:#f59e0b">⚠️ <strong>MODO INCOGNITO:</strong> Navegação privada detectada.</p>';
-            }
-            
-            if (data.browserTampering) {
-                alertsDiv.innerHTML += '<p style="color:#ef4444">🚫 <strong>BROWSER MODIFICADO:</strong> Alto risco de bloqueio.</p>';
-            }
-            
-            if (alertsDiv.innerHTML === '') {
-                alertsDiv.innerHTML = '<p style="color:#10b981">✅ <strong>SEM ALERTAS:</strong> Perfil aparentemente seguro para uso.</p>';
-            }
-        }
-
-        // ATUALIZAR ANÁLISE DO FINGERPRINT
-        function refreshFingerprint() {
-            if (!document.getElementById('fp-api-key').value.trim()) {
-                alert("Insira a API Key primeiro");
-                return;
-            }
-            
-            document.getElementById('fp-progress').innerText = "Atualizando análise...";
-            document.getElementById('fp-progress').style.color = "#f59e0b";
-            
-            // Simular nova análise
-            setTimeout(() => {
-                if (fingerprintClient) {
-                    // Em produção, faria uma nova chamada à API
-                    fingerprintClient.get().then(updateFingerprintUI);
-                } else {
-                    simulateFingerprintData();
-                }
-                
-                document.getElementById('fp-progress').innerText = "✅ Análise atualizada!";
-                document.getElementById('fp-progress').style.color = "#10b981";
-            }, 1500);
-        }
-
-        // EXPORTAR DADOS DO FINGERPRINT
-        function exportFingerprintData() {
-            const fpData = {
-                visitorId: document.getElementById('fp-visitor-id').textContent,
-                suspectScore: document.getElementById('fp-score-value').textContent,
-                riskLevel: document.getElementById('fp-score-badge').textContent,
-                vpn: document.getElementById('fp-vpn-status').textContent,
-                incognito: document.getElementById('fp-incognito').textContent,
-                browserTampering: document.getElementById('fp-tampering').textContent,
-                location: document.getElementById('fp-location').textContent,
-                ip: document.getElementById('fp-ip').textContent,
-                timestamp: new Date().toISOString(),
-                companyData: {
-                    razao: document.getElementById('f-razao').textContent,
-                    cnpj: document.getElementById('f-cnpj').textContent
-                }
-            };
-            
-            const dataStr = JSON.stringify(fpData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `fingerprint_data_${new Date().getTime()}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            alert("✅ Dados do Fingerprint exportados como JSON!");
-        }
-
-        // FUNÇÕES EXISTENTES DO SEU CÓDIGO
-        function copiarTudo() {
-            const dados = {
-                razao: document.getElementById('f-razao').innerText,
-                cnpj: document.getElementById('f-cnpj').innerText,
-                endereco: document.getElementById('f-endereco-full').innerText,
-                cep: document.getElementById('f-cep').innerText,
-                whatsapp: document.getElementById('f-tel').innerText,
-                pixel: document.getElementById('pixel-id').value || "Não informado",
-                fingerprintId: document.getElementById('fp-visitor-id').innerText || "Não analisado",
-                fingerprintScore: document.getElementById('fp-score-value').innerText || "0"
-            };
-        
-            const textoBackup =
-`PIXEL TIKTOK:${dados.pixel}
-RAZÃO SOCIAL:${dados.razao}
-CNPJ:${dados.cnpj}
-ENDEREÇO:${dados.endereco}
-CEP:${dados.cep}
-WHATSAPP:${dados.whatsapp}
-FINGERPRINT ID:${dados.fingerprintId}
-FINGERPRINT SCORE:${dados.fingerprintScore}
-DATA:${new Date().toLocaleString()}`;
-        
-            navigator.clipboard.writeText(textoBackup).then(() => {
-                alert("✅ Todas as informações foram copiadas com sucesso!");
-            });
-        }
-
-        async function aquecerCookies() {
-            const qty = document.getElementById('cookie-qty').value;
-            const progress = document.getElementById('cookie-progress');
-            const lista = [...sites].sort(() => 0.5 - Math.random()).slice(0, qty);
-            
-            // Atualizar score do fingerprint (simulação)
-            const currentScore = parseInt(document.getElementById('fp-score-value').textContent) || 0;
-            const newScore = Math.min(100, currentScore + (qty * 3));
-            document.getElementById('fp-score-value').textContent = newScore;
-            
-            // Atualizar badge
-            const scoreBadge = document.getElementById('fp-score-badge');
-            if (newScore > 70) {
-                scoreBadge.className = 'score-badge score-low';
-                scoreBadge.textContent = 'ALTO';
-                document.getElementById('fp-score-desc').textContent = '🚫 Risco elevado';
-            } else if (newScore > 30) {
-                scoreBadge.className = 'score-badge score-medium';
-                scoreBadge.textContent = 'MÉDIO';
-                document.getElementById('fp-score-desc').textContent = '⚠️ Monitorar';
-            }
-            
-            alert("⚠️ Aquecer cookies aumentará seu Suspect Score. Clique em OK e aceite os pop-ups no topo do navegador.");
-            progress.innerText = "Iniciando aquecimento...";
-            progress.style.color = "#f59e0b";
-
-            for(let i=0; i < lista.length; i++) {
-                progress.innerText = `Abrindo ${i+1} de ${lista.length} (Score: ${newScore})...`;
-                window.open(lista[i], '_blank');
-                await new Promise(res => setTimeout(res, 5000));
-            }
-            progress.innerText = `✅ Concluído! Score atual: ${newScore}`;
-            progress.style.color = "#10b981";
-            
-            // Gerar novo alerta
-            generateSecurityAlerts({suspectScore: newScore});
-        }
-
-        function ativarPixel() {
-            const id = document.getElementById('pixel-id').value;
-            if (!id) {
-                alert("Por favor, insira o ID do Pixel.");
-                return;
-            }
-        
-            if (!window.ttq) {
-                !function (w, d, t) {
-                    w.TiktokAnalyticsObject = t;
-                    var ttq = w[t] = w[t] || [];
-                    ttq.methods = ["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"];
-                    ttq.setAndDefer = function (t, e) {
-                        t[e] = function () {
-                            t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
-                        }
-                    };
-                    for (var i = 0; i < ttq.methods.length; i++) {
-                        ttq.setAndDefer(ttq, ttq.methods[i]);
-                    }
-                    ttq.load = function (e) {
-                        var n = d.createElement("script");
-                        n.type = "text/javascript";
-                        n.async = true;
-                        n.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e + "&lib=" + t;
-                        var r = d.getElementsByTagName("script")[0];
-                        r.parentNode.insertBefore(n, r);
-                    };
-                    ttq.load(id);
-                    ttq.page();
-                }(window, document, 'ttq');
-            }
-        
-            document.getElementById('pixel-log').innerText =
-                `✅ Pixel ${id} Ativado nos dados atuais!`;
-            document.getElementById('pixel-log').style.color = "#00f2ea";
-        }
-
-        function trackEvent(name, val=0) {
-            // Verificar score antes de enviar evento
-            const currentScore = parseInt(document.getElementById('fp-score-value').textContent) || 0;
-            
-            if(currentScore > 70) {
-                if(!confirm(`⚠️ Score de risco ALTO (${currentScore}). Deseja enviar evento mesmo assim?`)) {
-                    return;
-                }
-            }
-            
-            if(window.ttq) {
-                ttq.track(name, { value: val, currency: 'BRL' });
-                document.getElementById('pixel-log').innerText = `🚀 Evento ${name} enviado! (Score: ${currentScore})`;
-            } else { 
-                alert("Ative o pixel primeiro!"); 
-            }
-        }
-
-        function copy(id) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
-            const btn = window.event.target;
-            const original = btn.innerText;
-            btn.innerText = "OK!";
-            setTimeout(() => btn.innerText = original, 800);
-        }
-
-        // INICIALIZAR QUANDO A PÁGINA CARREGAR
-        window.onload = init;
-        
-        // Configuração automática se houver API Key no localStorage
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedApiKey = localStorage.getItem('fp_api_key');
-            if(savedApiKey) {
-                document.getElementById('fp-api-key').value = savedApiKey;
-                // Inicializar automaticamente após 2 segundos
-                setTimeout(() => {
-                    if(confirm('API Key do Fingerprint encontrada. Inicializar automaticamente?')) {
-                        initFingerprint();
-                    }
-                }, 2000);
-            }
-            
-            // Salvar API Key quando o campo mudar
-            document.getElementById('fp-api-key').addEventListener('change', function() {
-                if(this.value.trim()) {
-                    localStorage.setItem('fp_api_key', this.value.trim());
-                }
-            });
-        });
+          // Dados de Hardware
+          document.getElementById('hardware-data').innerHTML = `
+              <li><strong>OS:</strong> ${result.os} ${result.osVersion}</li>
+              <li><strong>Browser:</strong> ${result.browserName}</li>
+              <li><strong>User Agent:</strong> <span class="text-xs break-all">${navigator.userAgent}</span></li>
+              <li><strong>Fuso Horário:</strong> ${result.timezone}</li>
+          `;
+          
+          console.log("Dados Completos:", result);
+        })
+        .catch(error => {
+          document.getElementById('loader').innerHTML = `<span class="text-red-500">Erro: ${error.message}</span>`;
+          console.error(error);
+        })
     </script>
 </body>
 </html>
